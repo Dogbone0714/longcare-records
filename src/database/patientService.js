@@ -157,13 +157,30 @@ export const searchPatients = async (searchTerm) => {
       return { success: false, data: [] };
     }
     
-    const filteredPatients = result.data.filter(patient => 
-      patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      patient.room.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (patient.diagnosis && patient.diagnosis.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (patient.notes && patient.notes.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    console.log('搜尋關鍵字:', searchTerm);
+    console.log('所有個案資料:', result.data);
     
+    const filteredPatients = result.data.filter(patient => {
+      const nameMatch = patient.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const roomMatch = patient.room.toLowerCase().includes(searchTerm.toLowerCase());
+      const diagnosisMatch = patient.diagnosis && patient.diagnosis.toLowerCase().includes(searchTerm.toLowerCase());
+      const notesMatch = patient.notes && patient.notes.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      console.log(`個案 ${patient.name}:`, {
+        name: patient.name,
+        room: patient.room,
+        diagnosis: patient.diagnosis,
+        notes: patient.notes,
+        nameMatch,
+        roomMatch,
+        diagnosisMatch,
+        notesMatch
+      });
+      
+      return nameMatch || roomMatch || diagnosisMatch || notesMatch;
+    });
+    
+    console.log('搜尋結果:', filteredPatients);
     return { success: true, data: filteredPatients };
   } catch (error) {
     console.error('搜尋個案失敗:', error);
