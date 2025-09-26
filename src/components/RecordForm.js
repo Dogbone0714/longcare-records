@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { exportToExcel, exportToPDF, exportPatientReport } from "../utils/exportUtils";
 import { useDatabase } from "../hooks/useDatabase";
+import PatientManagement from "./PatientManagement";
 
 export default function RecordForm() {
   const [form, setForm] = useState({
@@ -22,6 +23,8 @@ export default function RecordForm() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRecords, setFilteredRecords] = useState([]);
+  const [showPatientManagement, setShowPatientManagement] = useState(false);
+  const [selectedPatientInfo, setSelectedPatientInfo] = useState(null);
 
   // 使用資料庫 Hook
   const {
@@ -64,7 +67,8 @@ export default function RecordForm() {
     
     const recordData = {
       ...form,
-      date: new Date().toLocaleString('zh-TW')
+      date: new Date().toLocaleString('zh-TW'),
+      patientId: selectedPatientInfo?.id || null // 關聯個案 ID
     };
     
     const result = await createRecord(recordData);
@@ -85,6 +89,7 @@ export default function RecordForm() {
         sleep: "",
         note: ""
       });
+      setSelectedPatientInfo(null);
       alert("紀錄已成功儲存到本地資料庫！");
     } else {
       alert(`儲存失敗：${result.error}`);
@@ -130,6 +135,28 @@ export default function RecordForm() {
   // 清除搜尋
   const clearSearch = () => {
     setSearchTerm("");
+  };
+
+  // 處理個案選擇
+  const handlePatientSelect = (patient) => {
+    setSelectedPatientInfo(patient);
+    setForm(prev => ({
+      ...prev,
+      name: patient.name,
+      age: patient.age,
+      room: patient.room
+    }));
+  };
+
+  // 清除個案選擇
+  const clearPatientSelection = () => {
+    setSelectedPatientInfo(null);
+    setForm(prev => ({
+      ...prev,
+      name: "",
+      age: "",
+      room: ""
+    }));
   };
 
   // 載入狀態
@@ -180,7 +207,52 @@ export default function RecordForm() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* 表單區域 */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-6">新增紀錄</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-700">新增紀錄</h2>
+            <button
+              type="button"
+              onClick={() => setShowPatientManagement(true)}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200"
+            >
+              👥 個案管理
+            </button>
+          </div>
+          
+          {/* 個案選擇區域 */}
+          {selectedPatientInfo ? (
+            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-blue-900">已選擇個案</h3>
+                  <p className="text-sm text-blue-700">
+                    {selectedPatientInfo.name} | 年齡: {selectedPatientInfo.age} | 房號: {selectedPatientInfo.room}
+                    {selectedPatientInfo.diagnosis && ` | 診斷: ${selectedPatientInfo.diagnosis}`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={clearPatientSelection}
+                  className="px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                >
+                  清除選擇
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <div className="text-center">
+                <p className="text-gray-600 mb-2">尚未選擇個案</p>
+                <button
+                  type="button"
+                  onClick={() => setShowPatientManagement(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                >
+                  選擇個案
+                </button>
+              </div>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* 基本資料 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -511,6 +583,19 @@ export default function RecordForm() {
           )}
         </div>
       </div>
+
+      {/* 個案管理模態框 */}
+      {showPatientManagement && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <PatientManagement
+              onPatientSelect={handlePatientSelect}
+              selectedPatientId={selectedPatientInfo?.id}
+              onClose={() => setShowPatientManagement(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
