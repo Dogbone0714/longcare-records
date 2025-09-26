@@ -1,21 +1,5 @@
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import { generatePDFFromHTML } from './pdfGenerator';
-
-// 中文字體支援
-const setupChineseFont = (doc) => {
-  // 使用內建字體，避免外部字體載入問題
-  doc.setFont('helvetica');
-  return doc;
-};
-
-// 處理中文字符的函數
-const processChineseText = (text) => {
-  if (!text) return '';
-  // 將中文字符轉換為可顯示的格式
-  return text.toString();
-};
 
 // 匯出 Excel 檔案
 export const exportToExcel = (records, filename = '長照紀錄表') => {

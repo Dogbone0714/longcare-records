@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { exportToExcel, exportToPDF, exportPatientReport } from "../utils/exportUtils";
 import { useDatabase } from "../hooks/useDatabase";
 import PatientManagement from "./PatientManagement";
+import HealthCharts from "./HealthCharts";
 
 export default function RecordForm() {
   const [form, setForm] = useState({
@@ -24,6 +25,7 @@ export default function RecordForm() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredRecords, setFilteredRecords] = useState([]);
   const [showPatientManagement, setShowPatientManagement] = useState(false);
+  const [showHealthCharts, setShowHealthCharts] = useState(false);
   const [selectedPatientInfo, setSelectedPatientInfo] = useState(null);
 
   // 使用資料庫 Hook
@@ -195,13 +197,23 @@ export default function RecordForm() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-4 sm:mb-0">長照紀錄表</h1>
         
-        {/* 統計資訊 */}
-        {isInitialized && (
-          <div className="text-sm text-gray-600 text-center sm:text-right">
-            <p>總計紀錄: {statistics.totalRecords || 0} 筆</p>
-            <p>病患數量: {statistics.totalPatients || 0} 人</p>
-          </div>
-        )}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          {/* 統計資訊 */}
+          {isInitialized && (
+            <div className="text-sm text-gray-600 text-center sm:text-right">
+              <p>總計紀錄: {statistics.totalRecords || 0} 筆</p>
+              <p>病患數量: {statistics.totalPatients || 0} 人</p>
+            </div>
+          )}
+          
+          {/* 圖表按鈕 */}
+          <button
+            onClick={() => setShowHealthCharts(true)}
+            className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition duration-200 flex items-center gap-2"
+          >
+            📊 健康趨勢圖
+          </button>
+        </div>
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -592,6 +604,19 @@ export default function RecordForm() {
               onPatientSelect={handlePatientSelect}
               selectedPatientId={selectedPatientInfo?.id}
               onClose={() => setShowPatientManagement(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 健康趨勢圖模態框 */}
+      {showHealthCharts && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+            <HealthCharts
+              records={filteredRecords}
+              selectedPatient={selectedPatient}
+              onClose={() => setShowHealthCharts(false)}
             />
           </div>
         </div>

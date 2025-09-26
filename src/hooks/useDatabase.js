@@ -19,29 +19,6 @@ export const useDatabase = () => {
   const [patientNames, setPatientNames] = useState([]);
   const [statistics, setStatistics] = useState({});
 
-  // 初始化資料庫
-  const initializeDatabase = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const success = await initDatabase();
-      if (success) {
-        setIsInitialized(true);
-        await loadRecords();
-        await loadPatientNames();
-        await loadStatistics();
-      } else {
-        setError('資料庫初始化失敗，請檢查瀏覽器支援');
-      }
-    } catch (err) {
-      console.error('資料庫初始化錯誤:', err);
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   // 載入所有紀錄
   const loadRecords = useCallback(async () => {
     try {
@@ -80,6 +57,29 @@ export const useDatabase = () => {
       console.error('載入統計資料錯誤:', err);
     }
   }, []);
+
+  // 初始化資料庫
+  const initializeDatabase = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const success = await initDatabase();
+      if (success) {
+        setIsInitialized(true);
+        await loadRecords();
+        await loadPatientNames();
+        await loadStatistics();
+      } else {
+        setError('資料庫初始化失敗，請檢查瀏覽器支援');
+      }
+    } catch (err) {
+      console.error('資料庫初始化錯誤:', err);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadRecords, loadPatientNames, loadStatistics]);
 
   // 新增紀錄
   const createRecord = useCallback(async (recordData) => {
