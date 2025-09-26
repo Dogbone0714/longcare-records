@@ -346,81 +346,120 @@ export default function RecordForm() {
             <h2 className="text-xl font-semibold text-gray-700 mb-4 sm:mb-0">歷史紀錄</h2>
             
             {/* 搜尋和篩選區域 */}
-            <div className="space-y-3 sm:space-y-0 sm:space-x-3 sm:flex">
-              {/* 搜尋框 */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  placeholder="搜尋姓名、房號或備註..."
-                  className="w-full sm:w-64 px-3 py-2 pl-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <div className="absolute left-2 top-2.5 text-gray-400">
-                  🔍
+            <div className="space-y-4">
+              {/* 搜尋和篩選控制項 */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                {/* 搜尋框 */}
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={handleSearch}
+                    placeholder="搜尋姓名、房號或備註..."
+                    className="w-full px-3 py-2 pl-8 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div className="absolute left-2 top-2.5 text-gray-400">
+                    🔍
+                  </div>
+                  {searchTerm && (
+                    <button
+                      onClick={clearSearch}
+                      className="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
-                {searchTerm && (
-                  <button
-                    onClick={clearSearch}
-                    className="absolute right-2 top-2.5 text-gray-400 hover:text-gray-600"
+                
+                {/* 病患選擇 */}
+                {patientNames.length > 0 && (
+                  <select
+                    value={selectedPatient}
+                    onChange={(e) => setSelectedPatient(e.target.value)}
+                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px]"
                   >
-                    ✕
-                  </button>
+                    <option value="">所有病患</option>
+                    {patientNames.map(name => (
+                      <option key={name} value={name}>{name}</option>
+                    ))}
+                  </select>
                 )}
               </div>
               
-              {/* 病患選擇 */}
-              {patientNames.length > 0 && (
-                <select
-                  value={selectedPatient}
-                  onChange={(e) => setSelectedPatient(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">所有病患</option>
-                  {patientNames.map(name => (
-                    <option key={name} value={name}>{name}</option>
-                  ))}
-                </select>
-              )}
-              
-              {/* 匯出按鈕 */}
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => handleExportAll('excel')}
-                  disabled={records.length === 0}
-                  className="px-3 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
-                >
-                  📊 匯出 Excel
-                </button>
-                <button
-                  onClick={() => handleExportAll('pdf')}
-                  disabled={records.length === 0}
-                  className="px-3 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
-                >
-                  📄 匯出 PDF
-                </button>
-                <button
-                  onClick={() => handleExportPatient('excel')}
-                  disabled={filteredRecords.length === 0}
-                  className="px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
-                >
-                  📊 匯出篩選結果
-                </button>
-                <button
-                  onClick={() => handleExportPatient('pdf')}
-                  disabled={filteredRecords.length === 0}
-                  className="px-3 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200"
-                >
-                  📄 匯出篩選結果
-                </button>
-                {selectedPatient && (
-                  <button
-                    onClick={() => handleExportPatient('detailed')}
-                    className="px-3 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition duration-200"
-                  >
-                    📋 {selectedPatient} 詳細報告
-                  </button>
-                )}
+              {/* 匯出選項區域 */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-gray-700">匯出選項</h3>
+                  <div className="text-xs text-gray-500">
+                    顯示 {filteredRecords.length} 筆紀錄
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  {/* 全部資料匯出 */}
+                  <div>
+                    <div className="text-xs font-medium text-gray-600 mb-2">全部資料</div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleExportAll('excel')}
+                        disabled={records.length === 0}
+                        className="flex-1 px-4 py-2 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2"
+                      >
+                        <span>📊</span>
+                        <span>Excel</span>
+                      </button>
+                      <button
+                        onClick={() => handleExportAll('pdf')}
+                        disabled={records.length === 0}
+                        className="flex-1 px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2"
+                      >
+                        <span>📄</span>
+                        <span>PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* 篩選結果匯出 */}
+                  <div>
+                    <div className="text-xs font-medium text-gray-600 mb-2">篩選結果</div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleExportPatient('excel')}
+                        disabled={filteredRecords.length === 0}
+                        className="flex-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2"
+                      >
+                        <span>📊</span>
+                        <span>Excel</span>
+                      </button>
+                      <button
+                        onClick={() => handleExportPatient('pdf')}
+                        disabled={filteredRecords.length === 0}
+                        className="flex-1 px-4 py-2 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2"
+                      >
+                        <span>📄</span>
+                        <span>PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* 詳細報告 */}
+                  <div>
+                    <div className="text-xs font-medium text-gray-600 mb-2">詳細報告</div>
+                    <button
+                      onClick={() => handleExportPatient('detailed')}
+                      disabled={!selectedPatient || filteredRecords.length === 0}
+                      className="w-full px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 flex items-center justify-center gap-2"
+                    >
+                      <span>📋</span>
+                      <span>{selectedPatient ? `${selectedPatient} 報告` : '選擇病患'}</span>
+                    </button>
+                  </div>
+                </div>
+                
+                {/* 匯出提示 */}
+                <div className="mt-4 text-xs text-gray-500">
+                  💡 提示：篩選結果會根據搜尋條件和病患選擇動態更新
+                </div>
               </div>
             </div>
           </div>
